@@ -1,0 +1,4 @@
+.deps/
+.objs/
+lib/
+include/luz/gen/
