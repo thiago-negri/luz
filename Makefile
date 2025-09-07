@@ -19,6 +19,7 @@ CFLAGS := $(shell cat compile_flags.txt)
 SRC := $(wildcard $(SRCDIR)/*.c)
 SRCGEN := $(wildcard $(SRCGENDIR)/*.c)
 DEP := $(patsubst $(SRCDIR)/%.c, $(DEPDIR)/%.d, $(SRC))
+DEPPIC := $(patsubst $(SRCDIR)/%.c, $(DEPDIR)/%.pic.d, $(SRC))
 GEN := $(patsubst $(SRCGENDIR)/%.c, $(GENDIR)/%.h, $(SRCGEN))
 OBJ := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
 OBJPIC := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.pic.o, $(SRC))
@@ -35,7 +36,7 @@ clean:
 
 codegen: $(GEN)
 
-deps: $(DEP)
+deps: codegen $(DEP) $(DEPPIC)
 
 build: $(LIBDIR)/$(SHAREDLIB) $(LIBDIR)/$(STATICLIB)
 
@@ -53,7 +54,10 @@ $(DEPDIR) $(OBJDIR) $(GENDIR) $(LIBDIR):
 	mkdir -p $@
 
 $(DEPDIR)/%.d: $(SRCDIR)/%.c | $(DEPDIR)
-	$(CC) -I$(GENDIR)/ -MT $@ -MM -MP -MF $@ $< -o $@
+	$(CC) -I$(INCLUDEDIR)/ -MT '$(OBJDIR)/$(@F:.d=.o)' -M -o $@ $<
+
+$(DEPDIR)/%.pic.d: $(SRCDIR)/%.c | $(DEPDIR)
+	$(CC) -I$(INCLUDEDIR)/ -MT '$(OBJDIR)/$(@F:.d=.o)' -M -o $@ $<
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPDIR)/%.d | $(OBJDIR)
 	$(CC) $(CFLAGS) -c -O -o $@ $<
@@ -73,3 +77,4 @@ $(LIBDIR)/$(STATICLIB): $(OBJ) | $(LIBDIR)
 	ar rcs $@ $^
 
 include $(wildcard $(DEP))
+include $(wildcard $(DEPPIC))

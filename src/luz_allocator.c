@@ -1,10 +1,10 @@
-#include <luz/luz.h>
+#include "luz/luz.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 void *libc_malloc(usize size, void *_ctx, const char *file, u32 line)
 {
-	void *p;
+	void *p = 0;
 	ASSERT_DEBUG(size > 0);
 	p = malloc(size);
 	ASSERT_DEBUG(p != NULL);
@@ -19,7 +19,7 @@ void libc_free(void *p, usize _size, void *_ctx, const char *file, u32 line)
 
 void *libc_realloc(void *p, usize _old, usize new, void *_ctx, const char *file, u32 line)
 {
-	void *p_new;
+	void *p_new = 0;
 	ASSERT_DEBUG(p != NULL);
 	ASSERT_DEBUG(new > 0);
 	p_new = realloc(p, new);
@@ -37,7 +37,7 @@ void allocator_libc(struct allocator *allocator)
 
 void *libc_malloc_debug(usize size, void *ctx, const char *file, u32 line)
 {
-	void *p;
+	void *p = 0;
 	fprintf(stdout, "%s:%u: libc malloc(%lu)", file, line, size);
 	p = libc_malloc(size, ctx, file, line);
 	fprintf(stdout, " -> %p\n", p);
@@ -52,7 +52,7 @@ void libc_free_debug(void *p, usize size, void *ctx, const char *file, u32 line)
 
 void *libc_realloc_debug(void *p, usize old, usize new, void *ctx, const char *file, u32 line)
 {
-	void *p_new;
+	void *p_new = 0;
 	fprintf(stdout, "%s:%u: libc realloc(%p, %lu)", file, line, p, new);
 	p_new = libc_realloc(p, old, new, ctx, file, line);
 	fprintf(stdout, " -> %p\n", p_new);
