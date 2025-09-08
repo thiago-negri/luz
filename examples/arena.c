@@ -114,3 +114,11 @@ main(int argc, char *argv[])
 	FREE(&libc_allocator, buffer, buffer_size);
 	return 0;
 }
+/*******************************************************************************************
+sizeof_struct_person = 16
+ALIGNOF_STRUCT(person) = 4
+
+BUFFER (any space before '.' is padding):
+[11  BBBBBBBBBBBBBBBB22222   AAAAAAAAAAAAAAAAJJJJJJJJJJJJJJJJ.         ]
+                                                              ^ the arena offset is here.
+********************************************************************************************/
