@@ -41,7 +41,7 @@ main(int argc, char *argv[])
 
 	/* Allocates the buffer we want to use for the arena using libc's allocator. */
 	buffer_size = 70;
-	buffer = (u8 *)ALLOC(&libc_allocator, buffer_size, ALIGNOF(u8));
+	buffer = ALLOC(&libc_allocator, buffer_size, ALIGNOF(u8));
 
 	/* Initializes the entire buffer as spaces so it's easier to visualize the padding. */
 	memset(buffer, ' ', buffer_size);
