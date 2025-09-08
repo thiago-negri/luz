@@ -9,7 +9,8 @@ enum type
 	floating_point
 };
 
-void print_typedef(const char *type_name, size_t byte_size, enum type type)
+void
+print_typedef(const char *type_name, size_t byte_size, enum type type)
 {
 	switch (type)
 	{
@@ -79,8 +80,12 @@ void print_typedef(const char *type_name, size_t byte_size, enum type type)
 	}
 }
 
-int main(int argc, char *argv[])
+int
+main(int _argc, char *_argv[])
 {
+	(void)_argc;
+	(void)_argv;
+
 	printf("#ifndef __GEN_DEFINES_H__\n");
 	printf("#define __GEN_DEFINES_H__\n");
 

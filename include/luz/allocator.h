@@ -1,0 +1,66 @@
+#ifndef __LUZ_ALLOCATOR_H__
+#define __LUZ_ALLOCATOR_H__
+
+#include "alignof.h"
+#include "gen/gen-defines.h"
+
+/** Memory allocator */
+struct allocator
+{
+	/** Allocates memory, returns pointer to allocated memory, or NULL if fails. */
+	void *(*alloc)(usize size,       /**< Size of memory to allocate. */
+	               usize align,      /**< Alignment of the memory to allocate. */
+	               void *ctx,        /**< Allocator context. */
+	               const char *file, /**< File from where the alloc is being called. */
+	               u32 line);        /**< Line from where the alloc is being called. */
+	/** Free memory. */
+	void (*free)(void *p,          /**< Pointer of previously allocated memory. */
+	             usize size,       /**< Size of allocated memory. */
+	             void *ctx,        /**< Allocator context. */
+	             const char *file, /**< File from where the free is being called. */
+	             u32 line);        /**< Line from where the free is being called. */
+	/** Re-allocates memory, returns pointer to the new allocated memory, or NULL if fails. */
+	void *(*realloc)(void *p,          /**< Pointer of previously allocated memory. */
+	                 usize old_size,   /**< Old (current) size of allocated memory. */
+	                 usize new_size,   /**< New size of allocated memory. */
+	                 usize align,      /**< Alignment of the memory to allocate. */
+	                 void *ctx,        /**< Allocator context. */
+	                 const char *file, /**< File from where the realloc is being called. */
+	                 u32 line);        /**< Line from where the realloc is being called. */
+	/** Context pointer that should be passed to each allocator call. */
+	void *ctx;
+};
+DEFINE_ALIGNOF_STRUCT(allocator);
+
+struct arena_allocator
+{
+	u8 *buffer;
+	usize offset;
+	usize size;
+};
+
+/** Macro to use to allocate memory. */
+#define ALLOC(A, S, L) ((A)->alloc((S), (L), (A)->ctx, __FILE__, __LINE__))
+
+/** Macro to use to free memory. */
+#define FREE(A, P, S) ((A)->free((P), (S), (A)->ctx, __FILE__, __LINE__))
+
+/** Macro to use to realloc memory. */
+#define REALLOC(A, P, O, N, L) ((A)->realloc((P), (O), (N), (L), (A)->ctx, __FILE__, __LINE__))
+
+/** Memory allocator using libc defaults (stdlib's malloc, free, and realloc). */
+void allocator_libc(struct allocator *allocator);
+
+/** Memory allocator using libc defaults (stdlib's malloc, free, and realloc), prints debug messages. */
+void allocator_libc_debug(struct allocator *allocator);
+
+/** Setups an arena allocator. */
+void allocator_arena(struct allocator *allocator,   /**< Allocator interface to be initialized. */
+                     struct arena_allocator *arena, /**< Arena allocator context to use. */
+                     u8 *buffer,                    /**< Underlying buffer to use. */
+                     usize size);                   /**< Size of buffer. */
+
+/** Resets an arena allocator. */
+void arena_reset(struct arena_allocator *arena); /**< Arena allocator to reset. */
+
+#endif /* ! __LUZ_ALLOCATOR_H__ */

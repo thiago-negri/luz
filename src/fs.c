@@ -1,9 +1,11 @@
-#include "luz/luz.h"
+#include "luz/fs.h"
+#include "luz/assert.h"
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-u64 fs_timestamp(const char *path)
+u64
+fs_timestamp(const char *path)
 {
 	int rc = 0;
 	struct stat file_stat = { 0 };
@@ -13,7 +15,8 @@ u64 fs_timestamp(const char *path)
 	return file_stat.st_mtime;
 }
 
-void fs_delete(const char *path)
+void
+fs_delete(const char *path)
 {
 	int rc = 0;
 	ASSERT_DEBUG(path != NULL);
@@ -21,7 +24,8 @@ void fs_delete(const char *path)
 	ASSERT_DEBUG(rc == 0);
 }
 
-void fs_mkdir(const char *path)
+void
+fs_mkdir(const char *path)
 {
 	int rc = 0;
 	rc = mkdir(path, 0700);

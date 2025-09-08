@@ -1,8 +1,9 @@
-#include "luz/luz.h"
+#include "luz/assert.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void assert(const char *file, u32 line, const char *check_str, bool check)
+void
+assert(const char *file, u32 line, const char *check_str, bool check)
 {
 	if (!check)
 	{

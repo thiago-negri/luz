@@ -2,3 +2,4 @@
 .objs/
 lib/
 include/luz/gen/
+examples/arena
