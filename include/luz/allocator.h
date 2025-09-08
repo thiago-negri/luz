@@ -32,11 +32,12 @@ struct allocator
 };
 DEFINE_ALIGNOF_STRUCT(allocator);
 
+/** Arena memory allocator. */
 struct arena_allocator
 {
-	u8 *buffer;
-	usize offset;
-	usize size;
+	u8 *buffer;   /**< Underlying memory buffer. */
+	usize offset; /**< Current offset into the buffer. */
+	usize size;   /**< Size (capacity) of the buffer. */
 };
 
 /** Macro to use to allocate memory. */
@@ -54,7 +55,7 @@ void allocator_libc(struct allocator *allocator);
 /** Memory allocator using libc defaults (stdlib's malloc, free, and realloc), prints debug messages. */
 void allocator_libc_debug(struct allocator *allocator);
 
-/** Setups an arena allocator. */
+/** Initializes an arena allocator. */
 void allocator_arena(struct allocator *allocator,   /**< Allocator interface to be initialized. */
                      struct arena_allocator *arena, /**< Arena allocator context to use. */
                      u8 *buffer,                    /**< Underlying buffer to use. */
