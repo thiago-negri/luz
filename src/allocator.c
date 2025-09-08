@@ -102,11 +102,14 @@ arena_alloc(usize size, usize align, void *ctx, const char *_file, u32 _line)
 	padding = -arena->offset & (align - 1);
 	if (arena->offset + padding + size > arena->size)
 	{
-		ASSERT_DEBUG(FALSE);
-		return NULL;
+		p = NULL;
 	}
-	p = &arena->buffer[arena->offset + padding];
-	arena->offset += padding + size;
+	else
+	{
+		p = &arena->buffer[arena->offset + padding];
+		arena->offset += padding + size;
+	}
+	ASSERT_DEBUG(p != NULL);
 	return p;
 }
 
@@ -121,17 +124,11 @@ arena_free(void *_p, usize _size, void *_ctx, const char *_file, u32 _line)
 }
 
 static void *
-arena_realloc(void *_p, usize _old, usize _new, usize _align, void *_ctx, const char *_file, u32 _line)
+arena_realloc(void *_p, usize _old, usize new, usize align, void *ctx, const char *file, u32 line)
 {
 	(void)_p;
 	(void)_old;
-	(void)_new;
-	(void)_align;
-	(void)_ctx;
-	(void)_file;
-	(void)_line;
-	ASSERT_DEBUG(FALSE);
-	return NULL;
+	return arena_alloc(new, align, ctx, file, line);
 }
 
 void
