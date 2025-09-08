@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Check the produced buffer and move the declarations around, you'll notice that the compiler changes the order of the
- * fields. */
 struct person
 {
 	char name[6];
