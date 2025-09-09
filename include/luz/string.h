@@ -7,6 +7,7 @@
 #include "gen/gen-defines.h"
 
 /** A string with defined size, does not end with a '\0' byte. */
+/* TODO 2025-09-09 Need easier ways to print strings to FILE*, update examples/string_builder.c */
 struct string
 {
 	usize size;    /**< Size of the string. */

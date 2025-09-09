@@ -44,8 +44,10 @@ DEFINE_ALIGNOF_STRUCT(arena_allocator);
 /** Debug allocator context. */
 struct debug_allocator
 {
+	/* TODO 2025-09-09 Add a list of allocated objects that can be checked at any point to detect leaks. */
 	const char *ref; /**< A reference string to be logged as part of each operation. */
 };
+DEFINE_ALIGNOF_STRUCT(debug_allocator);
 
 /** Macro to use to allocate memory. */
 #define ALLOC(A, S, L) ((A)->alloc((S), (L), (A)->ctx, __FILE__, __LINE__))
@@ -71,6 +73,7 @@ struct debug_allocator
 void allocator_libc(struct allocator *allocator);
 
 /** Memory allocator using libc defaults (stdlib's malloc, free, and realloc), prints debug messages. */
+/* TODO 2025-09-09 Docs and maybe return the context? (using libc to allocate anyway) */
 void allocator_libc_debug(struct allocator *allocator, struct debug_allocator *ctx);
 
 /** Initializes an arena allocator. */
