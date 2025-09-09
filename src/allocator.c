@@ -56,37 +56,43 @@ allocator_libc(struct allocator *allocator)
 static void *
 libc_malloc_debug(usize size, usize align, void *ctx, const char *file, u32 line)
 {
+	struct debug_allocator *debug = 0;
 	void *p = 0;
+	debug = ctx;
 	fprintf(stdout, "%s:%u: libc malloc(%lu)", file, line, size);
 	p = libc_malloc(size, align, ctx, file, line);
-	fprintf(stdout, " -> %p\n", p);
+	fprintf(stdout, " -> %p -- %s\n", p, debug->ref);
 	return p;
 }
 
 static void
 libc_free_debug(void *p, usize size, void *ctx, const char *file, u32 line)
 {
-	fprintf(stdout, "%s:%u: libc free(%p)\n", file, line, p);
+	struct debug_allocator *debug = 0;
+	debug = ctx;
+	fprintf(stdout, "%s:%u: libc free(%p) -- %s\n", file, line, p, debug->ref);
 	libc_free(p, size, ctx, file, line);
 }
 
 static void *
 libc_realloc_debug(void *p, usize old, usize new, usize align, void *ctx, const char *file, u32 line)
 {
+	struct debug_allocator *debug = 0;
 	void *p_new = 0;
+	debug = ctx;
 	fprintf(stdout, "%s:%u: libc realloc(%p, %lu)", file, line, p, new);
 	p_new = libc_realloc(p, old, new, align, ctx, file, line);
-	fprintf(stdout, " -> %p\n", p_new);
+	fprintf(stdout, " -> %p -- %s\n", p_new, debug->ref);
 	return p_new;
 }
 
 void
-allocator_libc_debug(struct allocator *allocator)
+allocator_libc_debug(struct allocator *allocator, struct debug_allocator *ctx)
 {
 	allocator->alloc = libc_malloc_debug;
 	allocator->free = libc_free_debug;
 	allocator->realloc = libc_realloc_debug;
-	allocator->ctx = NULL;
+	allocator->ctx = ctx;
 }
 
 static void *
@@ -98,7 +104,7 @@ arena_alloc(usize size, usize align, void *ctx, const char *_file, u32 _line)
 	(void)_file;
 	(void)_line;
 	ASSERT_DEBUG(ctx != NULL);
-	arena = (struct arena_allocator *)ctx;
+	arena = ctx;
 	padding = -arena->offset & (align - 1);
 	if (arena->offset + padding + size > arena->size)
 	{

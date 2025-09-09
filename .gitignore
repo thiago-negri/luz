@@ -3,3 +3,4 @@
 lib/
 include/luz/gen/
 examples/arena
+examples/string_builder

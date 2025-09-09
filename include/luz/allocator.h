@@ -39,21 +39,39 @@ struct arena_allocator
 	usize offset; /**< Current offset into the buffer. */
 	usize size;   /**< Size (capacity) of the buffer. */
 };
+DEFINE_ALIGNOF_STRUCT(arena_allocator);
+
+/** Debug allocator context. */
+struct debug_allocator
+{
+	const char *ref; /**< A reference string to be logged as part of each operation. */
+};
 
 /** Macro to use to allocate memory. */
 #define ALLOC(A, S, L) ((A)->alloc((S), (L), (A)->ctx, __FILE__, __LINE__))
 
+/** Macro for allocating memory to hold an array of N struct T. */
+#define ALLOC_STRUCT(A, T, N) ((A)->alloc(sizeof(struct T) * (N), ALIGNOF_STRUCT(T), (A)->ctx, __FILE__, __LINE__))
+
 /** Macro to use to free memory. */
 #define FREE(A, P, S) ((A)->free((P), (S), (A)->ctx, __FILE__, __LINE__))
 
+/** Macro for freeing memory to hold an array of N struct T. */
+#define FREE_STRUCT(A, P, T, N) ((A)->free((P), sizeof(struct T) * (N), (A)->ctx, __FILE__, __LINE__))
+
 /** Macro to use to realloc memory. */
 #define REALLOC(A, P, O, N, L) ((A)->realloc((P), (O), (N), (L), (A)->ctx, __FILE__, __LINE__))
+
+/** Macro for reallocating memory to hold an array of (O->N) struct T. */
+#define REALLOC_STRUCT(A, P, T, O, N)                                                                                  \
+	((A)->realloc((P), sizeof(struct T) * (O), sizeof(struct T) * (N), ALIGNOF_STRUCT(T), (A)->ctx, __FILE__,      \
+	              __LINE__))
 
 /** Memory allocator using libc defaults (stdlib's malloc, free, and realloc). */
 void allocator_libc(struct allocator *allocator);
 
 /** Memory allocator using libc defaults (stdlib's malloc, free, and realloc), prints debug messages. */
-void allocator_libc_debug(struct allocator *allocator);
+void allocator_libc_debug(struct allocator *allocator, struct debug_allocator *ctx);
 
 /** Initializes an arena allocator. */
 void allocator_arena(struct allocator *allocator,   /**< Allocator interface to be initialized. */
