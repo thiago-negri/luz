@@ -39,7 +39,7 @@ str_alloc_dup(struct allocator *allocator, struct string *src)
 	{
 		return NULL;
 	}
-	s->start = ALLOC(allocator, src->size, ALIGNOF(char));
+	s->start = ALLOC(allocator, char, src->size);
 	if (s->start == NULL)
 	{
 		FREE_STRUCT(allocator, s, string, 1);
@@ -101,7 +101,7 @@ str_alloc_cstr_dup_slice(struct allocator *allocator, const char *src, usize len
 	}
 	if (length > 0)
 	{
-		s->start = ALLOC(allocator, length, ALIGNOF(char));
+		s->start = ALLOC(allocator, char, length);
 		if (s->start == NULL)
 		{
 			FREE_STRUCT(allocator, s, string, 1);
@@ -121,19 +121,19 @@ str_alloc_cstr_dup_slice(struct allocator *allocator, const char *src, usize len
 }
 
 struct string *
-str_alloc_from_sb(struct allocator *allocator, struct string_builder *sb)
+str_alloc_from_strl(struct allocator *allocator, struct string_list *strl)
 {
 	usize length = 0;
 	struct string *s = 0;
 	ASSERT_DEBUG(allocator != NULL);
-	ASSERT_DEBUG(sb != NULL);
-	length = sb_length(sb);
+	ASSERT_DEBUG(strl != NULL);
+	length = strl_str_length(strl);
 	s = ALLOC_STRUCT(allocator, string, 1);
 	if (s == NULL)
 	{
 		return NULL;
 	}
-	s->start = ALLOC(allocator, length, ALIGNOF(char));
+	s->start = ALLOC(allocator, char, length);
 	if (s->start == NULL)
 	{
 		FREE_STRUCT(allocator, s, string, 1);
@@ -141,7 +141,7 @@ str_alloc_from_sb(struct allocator *allocator, struct string_builder *sb)
 	}
 	s->is_owned = TRUE;
 	s->size = length;
-	sb_copy(s->start, sb);
+	strl_copy(s->start, strl);
 	return s;
 }
 
@@ -152,171 +152,171 @@ str_free(struct allocator *allocator, struct string *s)
 	ASSERT_DEBUG(s != NULL);
 	if (s->is_owned)
 	{
-		FREE(allocator, s->start, s->size);
+		FREE(allocator, s->start, char, s->size);
 	}
 	FREE_STRUCT(allocator, s, string, 1);
 }
 
-struct string_builder *
-sb_alloc(struct allocator *allocator)
+struct string_list *
+strl_alloc(struct allocator *allocator)
 {
-	struct string_builder *sb = 0;
+	struct string_list *strl = 0;
 	ASSERT_DEBUG(allocator != NULL);
-	sb = ALLOC_STRUCT(allocator, string_builder, 1);
-	if (sb == NULL)
+	strl = ALLOC_STRUCT(allocator, string_list, 1);
+	if (strl == NULL)
 	{
 		return NULL;
 	}
-	sb->allocator = allocator;
-	sb->head = NULL;
-	sb->last = NULL;
-	return sb;
+	strl->allocator = allocator;
+	strl->head = NULL;
+	strl->last = NULL;
+	return strl;
 }
 
 bool
-sb_append_view(struct string_builder *sb, struct string *s)
+strl_append_view(struct string_list *strl, struct string *s)
 {
-	struct string_list *node = 0;
-	ASSERT_DEBUG(sb != NULL);
+	struct string_list_node *node = 0;
+	ASSERT_DEBUG(strl != NULL);
 	ASSERT_DEBUG(s != NULL);
-	node = ALLOC_STRUCT(sb->allocator, string_list, 1);
+	node = ALLOC_STRUCT(strl->allocator, string_list, 1);
 	if (node == NULL)
 	{
 		return FALSE;
 	}
-	node->string = str_alloc_view(sb->allocator, s);
+	node->string = str_alloc_view(strl->allocator, s);
 	if (node->string == NULL)
 	{
-		FREE_STRUCT(sb->allocator, node, string_list, 1);
+		FREE_STRUCT(strl->allocator, node, string_list, 1);
 		return FALSE;
 	}
 	node->next = NULL;
-	if (sb->last == NULL)
+	if (strl->last == NULL)
 	{
-		sb->head = node;
+		strl->head = node;
 	}
 	else
 	{
-		sb->last->next = node;
+		strl->last->next = node;
 	}
-	sb->last = node;
+	strl->last = node;
 	return TRUE;
 }
 
 bool
-sb_append_dup(struct string_builder *sb, struct string *s)
+strl_append_dup(struct string_list *strl, struct string *s)
 {
-	struct string_list *node = 0;
-	ASSERT_DEBUG(sb != NULL);
+	struct string_list_node *node = 0;
+	ASSERT_DEBUG(strl != NULL);
 	ASSERT_DEBUG(s != NULL);
-	node = ALLOC_STRUCT(sb->allocator, string_list, 1);
+	node = ALLOC_STRUCT(strl->allocator, string_list, 1);
 	if (node == NULL)
 	{
 		return FALSE;
 	}
-	node->string = str_alloc_dup(sb->allocator, s);
+	node->string = str_alloc_dup(strl->allocator, s);
 	if (node->string == NULL)
 	{
-		FREE_STRUCT(sb->allocator, node, string_list, 1);
+		FREE_STRUCT(strl->allocator, node, string_list, 1);
 		return FALSE;
 	}
 	node->next = NULL;
-	if (sb->last == NULL)
+	if (strl->last == NULL)
 	{
-		sb->head = node;
+		strl->head = node;
 	}
 	else
 	{
-		sb->last->next = node;
+		strl->last->next = node;
 	}
-	sb->last = node;
+	strl->last = node;
 	return TRUE;
 }
 
 bool
-sb_append_cstr_dup(struct string_builder *sb, const char *s)
+strl_append_cstr_dup(struct string_list *strl, const char *s)
 {
-	struct string_list *node = 0;
-	ASSERT_DEBUG(sb != NULL);
+	struct string_list_node *node = 0;
+	ASSERT_DEBUG(strl != NULL);
 	ASSERT_DEBUG(s != NULL);
-	node = ALLOC_STRUCT(sb->allocator, string_list, 1);
+	node = ALLOC_STRUCT(strl->allocator, string_list, 1);
 	if (node == NULL)
 	{
 		return FALSE;
 	}
-	node->string = str_alloc_cstr_dup(sb->allocator, s);
+	node->string = str_alloc_cstr_dup(strl->allocator, s);
 	if (node->string == NULL)
 	{
-		FREE_STRUCT(sb->allocator, node, string_list, 1);
+		FREE_STRUCT(strl->allocator, node, string_list, 1);
 		return FALSE;
 	}
 	node->next = NULL;
-	if (sb->last == NULL)
+	if (strl->last == NULL)
 	{
-		sb->head = node;
+		strl->head = node;
 	}
 	else
 	{
-		sb->last->next = node;
+		strl->last->next = node;
 	}
-	sb->last = node;
+	strl->last = node;
 	return TRUE;
 }
 
 bool
-sb_append_cstr_view(struct string_builder *sb, const char *s)
+strl_append_cstr_view(struct string_list *strl, const char *s)
 {
-	struct string_list *node = 0;
-	ASSERT_DEBUG(sb != NULL);
+	struct string_list_node *node = 0;
+	ASSERT_DEBUG(strl != NULL);
 	ASSERT_DEBUG(s != NULL);
-	node = ALLOC_STRUCT(sb->allocator, string_list, 1);
+	node = ALLOC_STRUCT(strl->allocator, string_list, 1);
 	if (node == NULL)
 	{
 		return FALSE;
 	}
-	node->string = str_alloc_cstr_view(sb->allocator, s);
+	node->string = str_alloc_cstr_view(strl->allocator, s);
 	if (node->string == NULL)
 	{
-		FREE_STRUCT(sb->allocator, node, string_list, 1);
+		FREE_STRUCT(strl->allocator, node, string_list, 1);
 		return FALSE;
 	}
 	node->next = NULL;
-	if (sb->last == NULL)
+	if (strl->last == NULL)
 	{
-		sb->head = node;
+		strl->head = node;
 	}
 	else
 	{
-		sb->last->next = node;
+		strl->last->next = node;
 	}
-	sb->last = node;
+	strl->last = node;
 	return TRUE;
 }
 
 void
-sb_free(struct string_builder *sb)
+strl_free(struct string_list *strl)
 {
-	struct string_list *node = 0;
-	struct string_list *next = 0;
-	ASSERT_DEBUG(sb != NULL);
-	node = sb->head;
+	struct string_list_node *node = 0;
+	struct string_list_node *next = 0;
+	ASSERT_DEBUG(strl != NULL);
+	node = strl->head;
 	while (node != NULL)
 	{
 		next = node->next;
-		str_free(sb->allocator, node->string);
-		FREE_STRUCT(sb->allocator, node, string_list, 1);
+		str_free(strl->allocator, node->string);
+		FREE_STRUCT(strl->allocator, node, string_list, 1);
 		node = next;
 	}
-	FREE_STRUCT(sb->allocator, sb, string_builder, 1);
+	FREE_STRUCT(strl->allocator, strl, string_list, 1);
 }
 
 usize
-sb_length(struct string_builder *sb)
+strl_str_length(struct string_list *strl)
 {
-	struct string_list *node = 0;
+	struct string_list_node *node = 0;
 	usize length = 0;
-	ASSERT_DEBUG(sb != NULL);
-	node = sb->head;
+	ASSERT_DEBUG(strl != NULL);
+	node = strl->head;
 	while (node != NULL)
 	{
 		length += node->string->size;
@@ -326,9 +326,9 @@ sb_length(struct string_builder *sb)
 }
 
 void
-sb_copy(char *dst, struct string_builder *src)
+strl_copy(char *dst, struct string_list *src)
 {
-	struct string_list *node = 0;
+	struct string_list_node *node = 0;
 	ASSERT_DEBUG(src != NULL);
 	node = src->head;
 	while (node != NULL)

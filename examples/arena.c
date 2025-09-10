@@ -41,7 +41,7 @@ main(int argc, char *argv[])
 
 	/* Allocates the buffer we want to use for the arena using libc's allocator. */
 	buffer_size = 70;
-	buffer = ALLOC(&libc_allocator, buffer_size, ALIGNOF(u8));
+	buffer = ALLOC(&libc_allocator, u8, buffer_size);
 
 	/* Initializes the entire buffer as spaces so it's easier to visualize the padding. */
 	memset(buffer, ' ', buffer_size);
@@ -53,25 +53,25 @@ main(int argc, char *argv[])
 
 	/* Allocates 2 bytes in the arena. This is the first allocation, should not produce any padding. */
 	first_size = 2;
-	first = ALLOC(&arena_allocator, first_size, ALIGNOF(char));
+	first = ALLOC(&arena_allocator, char, first_size);
 
 	/* Allocates "bob", as we are at offset 2, and person has an alignment of 4, this will produce padding in the
 	 * underlying buffer. */
-	bob = ALLOC(&arena_allocator, sizeof_struct_person, ALIGNOF_STRUCT(person));
+	bob = ALLOC_STRUCT(&arena_allocator, person, 1);
 
 	/* Allocates 5 bytes in the arena. Should not introduce any padding as ALIGNOF(char) is probably 1. */
 	second_size = 5;
-	second = ALLOC(&arena_allocator, second_size, ALIGNOF(char));
+	second = ALLOC(&arena_allocator, char, second_size);
 
 	/* Allocates "alice", as the previous allocation was 5 bytes, this will introduce padding as well. */
-	alice = ALLOC(&arena_allocator, sizeof_struct_person, ALIGNOF_STRUCT(person));
+	alice = ALLOC_STRUCT(&arena_allocator, person, 1);
 
 	/* Allocates "jon", as the previous allocation was another person, this should not introduce padding. */
-	jon = ALLOC(&arena_allocator, sizeof_struct_person, ALIGNOF_STRUCT(person));
+	jon = ALLOC_STRUCT(&arena_allocator, person, 1);
 
 	/* Allocates 1 extra byte. */
 	end_size = 1;
-	end = ALLOC(&arena_allocator, end_size, ALIGNOF(char));
+	end = ALLOC(&arena_allocator, char, end_size);
 
 	/* Make it easier to see in the underlying buffer where each piece of memory is. */
 	memset(first, '1', first_size);
@@ -111,7 +111,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	FREE(&libc_allocator, buffer, buffer_size);
+	FREE(&libc_allocator, buffer, u8, buffer_size);
 	return 0;
 }
 /*******************************************************************************************
