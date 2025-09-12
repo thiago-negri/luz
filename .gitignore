@@ -2,5 +2,6 @@
 .objs/
 lib/
 include/luz/gen/
-examples/arena
-examples/string_builder
+example/arena
+example/string_builder
+test/allocator

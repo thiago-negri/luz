@@ -24,15 +24,19 @@ GEN := $(patsubst $(SRCGENDIR)/%.c, $(GENDIR)/%.h, $(SRCGEN))
 OBJ := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
 OBJPIC := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.pic.o, $(SRC))
 
-.PHONY: default clean codegen deps build install
+.PHONY: default clean codegen deps build install test
 
-default: codegen deps build
+default: codegen deps build test
+
+test:
+	$(MAKE) -C $@
 
 clean:
 	rm -rf $(OBJDIR)
 	rm -rf $(DEPDIR)
 	rm -rf $(GENDIR)
 	rm -rf $(LIBDIR)
+	$(MAKE) -C test clean
 
 codegen: $(GEN)
 
