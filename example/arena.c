@@ -1,6 +1,4 @@
-#include <luz/alignof.h>
-#include <luz/allocator.h>
-#include <luz/gen/gen-defines.h>
+#include <luz/luz.h>
 #include <stdio.h>
 #include <string.h>
 

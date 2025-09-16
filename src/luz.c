@@ -89,13 +89,20 @@ libc_realloc_debug(void *p, usize old, usize new, usize align, void *ctx, const 
 	return p_new;
 }
 
-void
-allocator_libc_debug(struct allocator *allocator, struct debug_allocator *ctx)
+struct debug_allocator *
+allocator_libc_debug(struct allocator *allocator)
 {
+	struct debug_allocator *ctx = NULL;
+	ctx = malloc(sizeof *ctx);
+	if (ctx == NULL)
+	{
+		return NULL;
+	}
 	allocator->alloc = libc_malloc_debug;
 	allocator->free = libc_free_debug;
 	allocator->realloc = libc_realloc_debug;
 	allocator->ctx = ctx;
+	return ctx;
 }
 
 static void *

@@ -1,6 +1,4 @@
-#include <luz/allocator.h>
-#include <luz/assert.h>
-#include <luz/string.h>
+#include <luz/luz.h>
 #include <stdio.h>
 
 void

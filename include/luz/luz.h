@@ -109,8 +109,7 @@ DEFINE_ALIGNOF_STRUCT(debug_allocator);
 void allocator_libc(struct allocator *allocator);
 
 /** Memory allocator using libc defaults (stdlib's malloc, free, and realloc), prints debug messages. */
-/* TODO(tnegri) 2025-09-09 Docs and maybe return the context? (using libc to allocate anyway) */
-void allocator_libc_debug(struct allocator *allocator, struct debug_allocator *ctx);
+struct debug_allocator *allocator_libc_debug(struct allocator *allocator);
 
 /** Initializes an arena allocator. */
 void allocator_arena(struct allocator *allocator,   /**< Allocator interface to be initialized. */
