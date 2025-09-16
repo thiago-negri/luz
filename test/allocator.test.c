@@ -1,5 +1,4 @@
-#include "luz/allocator.h"
-#include "luz/test.h"
+#include "luz/luz.h"
 
 static void
 arena_align(void)
@@ -32,4 +31,5 @@ int
 main(void)
 {
 	arena_align();
+	return 0;
 }

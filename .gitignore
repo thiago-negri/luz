@@ -1,5 +1,5 @@
-.deps/
-.objs/
+.build/
+.test/
 lib/
 include/luz/gen/
 example/arena
