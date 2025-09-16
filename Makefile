@@ -6,7 +6,8 @@ INCLUDEDIR := include
 
 OBJDIR := .objs
 DEPDIR := .deps
-GENDIR := include/$(LIBNAME)/gen
+HEADERDIR := $(INCLUDEDIR)/$(LIBNAME)
+GENDIR := $(HEADERDIR)/gen
 LIBDIR := lib
 
 SHAREDLIB := lib$(LIBNAME).so
@@ -18,6 +19,7 @@ CFLAGS := $(shell cat compile_flags.txt)
 CFLAGS += -flto
 LDFLAGS += -flto
 
+HEADER := $(wildcard $(HEADERDIR)/*.h)
 SRC := $(wildcard $(SRCDIR)/*.c)
 SRCGEN := $(wildcard $(SRCGENDIR)/*.c)
 DEP := $(patsubst $(SRCDIR)/%.c, $(DEPDIR)/%.d, $(SRC))
@@ -25,6 +27,7 @@ DEPPIC := $(patsubst $(SRCDIR)/%.c, $(DEPDIR)/%.pic.d, $(SRC))
 GEN := $(patsubst $(SRCGENDIR)/%.c, $(GENDIR)/%.h, $(SRCGEN))
 OBJ := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
 OBJPIC := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.pic.o, $(SRC))
+LIB := $(LIBDIR)/$(SHAREDLIB) $(LIBDIR)/$(STATICLIB)
 
 .PHONY: default clean codegen deps build install test
 
@@ -44,19 +47,19 @@ codegen: $(GEN)
 
 deps: codegen $(DEP) $(DEPPIC)
 
-build: $(LIBDIR)/$(SHAREDLIB) $(LIBDIR)/$(STATICLIB)
+build: $(LIB)
 
-install: $(LIBDIR)/$(SHAREDLIB) $(LIBDIR)/$(STATICLIB)
-	cp $(LIBDIR)/$(SHAREDLIB) $(INSTALLDIR)/$(LIBDIR)/$(SHAREDLIB)
-	cp $(LIBDIR)/$(STATICLIB) $(INSTALLDIR)/$(LIBDIR)/$(STATICLIB)
-	cp -r $(INCLUDEDIR)/$(LIBNAME)/ $(INSTALLDIR)/$(INCLUDEDIR)/
+install: $(LIB) $(INSTALLDIR)/$(LIBDIR) $(INSTALLDIR)/$(HEADERDIR) $(INSTALLDIR)/$(GENDIR)
+	cp $(LIB) $(INSTALLDIR)/$(LIBDIR)/
+	cp $(HEADER) $(INSTALLDIR)/$(HEADERDIR)/
+	cp $(GEN) $(INSTALLDIR)/$(GENDIR)/
 
 uninstall:
 	rm -f $(INSTALLDIR)/$(LIBDIR)/$(SHAREDLIB)
 	rm -f $(INSTALLDIR)/$(LIBDIR)/$(STATICLIB)
 	rm -rf $(INSTALLDIR)/$(INCLUDEDIR)/$(LIBNAME)/
 
-$(DEPDIR) $(OBJDIR) $(GENDIR) $(LIBDIR):
+$(DEPDIR) $(OBJDIR) $(GENDIR) $(LIBDIR) $(INSTALLDIR)/$(LIBDIR) $(INSTALLDIR)/$(HEADERDIR) $(INSTALLDIR)/$(GENDIR):
 	mkdir -p $@
 
 $(DEPDIR)/%.d: $(SRCDIR)/%.c | $(DEPDIR)
