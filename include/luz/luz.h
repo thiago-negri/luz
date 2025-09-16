@@ -84,6 +84,9 @@ struct debug_allocator
 };
 DEFINE_ALIGNOF_STRUCT(debug_allocator);
 
+/** Macro to use to allocate memory, caller need to pass in size and align. */
+#define ALLOC_RAW(A, S, L) ((A)->alloc((S), (L), (A)->ctx, __FILE__, __LINE__))
+
 /** Macro to use to allocate memory. */
 #define ALLOC(A, T, N) ((A)->alloc(sizeof(T) * (N), ALIGNOF(T), (A)->ctx, __FILE__, __LINE__))
 
@@ -91,10 +94,16 @@ DEFINE_ALIGNOF_STRUCT(debug_allocator);
 #define ALLOC_STRUCT(A, T, N) ((A)->alloc(sizeof(struct T) * (N), ALIGNOF_STRUCT(T), (A)->ctx, __FILE__, __LINE__))
 
 /** Macro to use to free memory. */
+#define FREE_RAW(A, P, O) ((A)->free((P), (O), (A)->ctx, __FILE__, __LINE__))
+
+/** Macro to use to free memory. */
 #define FREE(A, P, T, N) ((A)->free((P), sizeof(T) * (N), (A)->ctx, __FILE__, __LINE__))
 
 /** Macro for freeing memory to hold an array of N struct T. */
 #define FREE_STRUCT(A, P, T, N) ((A)->free((P), sizeof(struct T) * (N), (A)->ctx, __FILE__, __LINE__))
+
+/** Macro to use to realloc memory, caller need to pass in size and align. */
+#define REALLOC_RAW(A, P, O, N, L) ((A)->realloc((P), (O), (N), (L), (A)->ctx, __FILE__, __LINE__))
 
 /** Macro to use to realloc memory. */
 #define REALLOC(A, P, T, O, N)                                                                                         \
@@ -273,5 +282,37 @@ int test_assert(int test, const char *test_cstr, const char *file, u32 line);
 	{                                                                                                              \
 	}                                                                                                              \
 	while (0)
+
+/** An array of dynamic size. */
+struct dynamic_array
+{
+	struct allocator *allocator; /**< Allocator used to alloc/realloc the array as needed. */
+	usize item_size;             /**< Size of one item. */
+	usize item_align;            /**< Align of one item. */
+	usize capacity;              /**< Current capacity of the array (max item count before a realloc is needed). */
+	usize count;                 /**< Current count of items in the array. */
+	u8 *data;                    /**< Memory block backing this array. */
+};
+DEFINE_ALIGNOF_STRUCT(dynamic_array);
+
+/** How much a dynamic array grows when it needs to. */
+#define DYNAMIC_ARRAY_GROWTH_FACTOR 1.5
+
+/** Allocates a new dynamic array. */
+struct dynamic_array *da_alloc(struct allocator *a, /**< Allocator to use. */
+                               usize item_size,     /**< Size of an item. */
+                               usize item_align,    /**< Align of an item. */
+                               usize capacity);     /**< Initial capacity of the array. */
+
+/** Ensure the dynamic array can hold at least N items. */
+int da_ensure_capacity(struct dynamic_array *da, /**< Dynamic array. */
+                       usize capacity);          /**< Minimal capacity it must hold. */
+
+/** Appends an item (copies memory over), grows the dynamic array if necessary. */
+int da_append_copy(struct dynamic_array *da, /**< Dynamic array. */
+                   void *item);              /** The item to be copied into the array. */
+
+/** Frees a dynamic array. */
+void da_free(struct dynamic_array *da); /**< Dynamic array. */
 
 #endif /* ! __LUZ_H__ */
