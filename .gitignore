@@ -1,5 +1,7 @@
-.build/
-.test/
+.deps/
+.objs/
+test/*.static
+test/*.shared
 lib/
 include/luz/gen/
 example/arena

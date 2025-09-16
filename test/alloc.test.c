@@ -1,4 +1,5 @@
-#include "luz/luz.h"
+#include <luz/alloc.h>
+#include <luz/test.h>
 
 static void
 arena_align(void)

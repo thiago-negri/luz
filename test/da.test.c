@@ -1,4 +1,6 @@
-#include "luz/luz.h"
+#include <luz/alloc.h>
+#include <luz/da.h>
+#include <luz/test.h>
 #include <stdio.h>
 #include <string.h>
 
